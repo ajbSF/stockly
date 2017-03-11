@@ -1,0 +1,108 @@
+Async JS
+
+CSP will be all the range in 18 months. we need to begin to understand this.
+
+metaphor - roller coaster ride - takes multiple people at one time. (parallelism, modeled using threads) vs going on the ride one at a time.
+in threaded system, we CO-ORDINATE.
+
+in case of async, as soon as the roller coaster leavs with 1 person, then immediately another roller coaster leaves with another person. so at one time u can have thousands of roller coasters riding at one time
+
+threaded programming is suited for CPU bound tasks
+if it's IO bound tasks, then async programming is good. slow resources like networks, disks, display to screen etc
+
+concurrency - two or more things happening in the same period of time
+async -       two or more things happening at exactly the same time
+
+slide (7 micro level tasks) in async, the perception of the system is different. orange and blue tasks can be interleaved.
+
+spinning out async tasks is easy, but coordinating the results is tough
+
+can callbacks be made better? maybe in terms of readability
+
+inversion of control is one of the evils of callback hell
+framework calls your stuff, vs your code calls libraries
+
+problem with cb - trust issues around inv of control
+
+callbacks dont remember state, in ex1 we had to come up with a way to handle that.
+
+thunks have already what they need to produce a value
+
+sync form of assignment is the = sign. async form is callback
+
+promises:
+promise is a reliable callback manager. it will treat callbacks in a consistent and predictable way.
+promise represents single value
+how can u use promises to model flow control
+
+try{
+	var x = doFirstThing();
+	var y = doSecondThing();
+	var z = doThirdThing();
+}
+catch (err){
+	
+}
+
+promises is the sync version of the async try catch
+
+doFT()
+.then (function(){
+	return doST();
+}, handle error)
+.then...
+
+
+abstractions:
+promise system never does anything for promises dont get resolved or rejected. can keep a timer to resolve this.
+promise.race can be used as a timeout. if timeout resolves first, then the orig promise has timedout
+you can make a helper function to make a sugary api to handle promise.race
+
+generators
+generators do not get interrupted, they yield
+there is a hidden yield at the beginning of a generator that starts the generator in its initial pause state
+when yield is reached, i'll wait until you figure out what value to put in here
+
+localized blocking. blocking is happening only to the inside of the generator. the rest of the program still runs 
+generators can be used everywhere (instead of using promise chain)
+
+to unwrap a promise, you yield the promise
+
+look at async functions
+
+async function main(){
+	var s1=getFile('File1');
+	...
+	output(await s1);
+	...
+}
+main();
+
+async only works with native promises, u cant await thunks, can't await ASQ
+generators are more flexible and useful
+
+promises only get resolved once, therefore can get tricky for event based like click handlers
+
+lazy arrays -> observables
+
+observables metaphor - spreadsheet - add value to a1 and b1 = a1 * 2 say. c1 = b1 + 5. we've created a chain of dependencies.
+obs is a stream of data . inp is an obs, output is also another obs performing operations along the way
+
+RxJs observables
+to model multiple events, observables are better for the job
+observables are multi value push (paper is called the general theory of reactivity)
+
+
+a channel is a stream with no buffer
+
+model our app as a series of individually run process that dont need to communicate with each other, but in case they do, there is a specific way of communicating, ie thru channel messaging
+CSP is sync messaging
+
+js-csp
+
+csp has proper ways to model deadlocks and starvation
+fav examples is pingpong
+
+ASQ runner runs generators
+
+

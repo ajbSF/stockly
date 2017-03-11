@@ -1,0 +1,214 @@
+advanced js
+
+scope is where to look for things
+scope is organzing things into buckets, ex blue marbles go into one bucket, red marbles go into another bucket
+compiler is sorting out variable declaration into different buckets
+
+js is a compiled language (per Kyle), since it's processed first by a compiler (egs if you're missing a comma, it will tell you). 
+there's a compilation pass and then an execution pass.
+
+foo bar baz example:
+compiler and the scope manager
+compiler first looks for formal var or function declaration. 
+	compiler asks scope manager, have u heard of foo (green bucket)
+	compiler asks scope manager, have u heard of bar (green bucket)
+		have u heard of foo inside bar
+	hey global scope i have a formal dec for baz (add to green)
+	next one is function parameter, whic is a formal declaration
+		hey scope of baz, have u ever heard of foo (blue bucket)
+		hey scope of bam, have u ever heard of bam (blue bucket). bam is not a declaration, so it will be handled at run time
+LHS RHS (left hand side, right hand side). sometimes it's obvious, sometimes it's not (in case of function params, it will be the target)
+
+Now during running:
+hey global scope, do u have a foo (if yes, here you go, else "go fish")
+then go into bar, foo is LHS reference
+
+line 8 executes like 4 and 1
+foo, yes there's a declaration
+in case of non-strict mode, while executing line 9, hey baz, have you heard of bam? No, go fish. go to next outer enlosing bucket, hey global scope, have u heard of bam? YES, since js creates global scope for variables not defined. This is at run time.
+in strict mode, global scope not created automatically, you'll get a reference error. 
+reference errors are run time errors that refer to variables that have never been formally declared
+
+
+always use strict mode!
+
+every single file in js is it's own separate program. the only thingin common is that they share reference to the gloabal scope.
+if you have a separate third party code that you're not sure if it will break in strict mode, put it in a separate file.
+strict mode prevents you from writing bad code that will prevent js engine to optimize and run your code fast
+strict mode is default in ES6 (??)
+strict mode can be done at function level. you can use this to change a non strict file little by little until all functions are strict, then move global to the file
+web assembly???
+
+
+global has foo now (green bucket)
+global has bar now (green bucket)
+	red bucket now has foo 
+global now has baz (green bucket)
+	foo has been added to baz
+
+at run time
+
+in strict mode, it fails at run time since bam is not defined
+
+hey gloabl scope i have an LHS (targret) reference for foo, have u heard of it?
+the first pass knows about structure, meta data , saves data
+second pass uses it
+
+2nd slide (baz inside bar)
+when execution engine reaches bar() it's a RHS reference for bar, have u heard of it? YES
+hey scope of bar have u heard of baz?
+hey scope of baz i have LHS for foo? YES 
+hey scope of baz, i have LHS for bam? go fish, hey scope of bar, do u have bam? go fish. hey global scope do u have bam? NO, i will create one for you ( non-strict mode). strict mode would give u refrence error
+if at line 3.5 there was alert(foo); then declaration exists, but value doesn't
+
+when it hits baz() it will say baz is not defined, since it's RHS. LHS is created automatically
+
+Kyle would like change the error message from 'x is not declared' vs 'x is not defined'
+
+if there's nothing in front of function, then its a funciton experession
+
+diff bet funciton expr that have a name and those that don't
+anonymous expr vs named expr
+a named func expr is always more preferable than anonymous functions exp - var foo = function bar()  is pref over var bar = function()
+why?
+- for self referencing a function
+- makes code more debuggable - if an error occurs, it will tell you the function name where error occurs vs just saying anonymous function error
+- makes code more self documenting
+
+lexical scope:
+scope determined at compile time. it's static, fixed. (which bucket the declaration goes to)
+good thing - predictibility, greater optimization since the code alreay knows scoping at run time
+bad thing - flexibility
+
+dynamic scope:
+not defined at compile time, but determined at run time. js does not have dynamic scope
+-  
+
+if you do-
+var a=2;
+var a
+console.log(a);
+it will still print 2 and not undefined since 'a' declaration already exists and won't declare, then assignment pass it gets assinged first line, but second line doens't assign it again.
+
+global.bob = bob;
+
+try to declare variables as close to the first usage of the variable as possible (instead of defining all variables at the top)
+use 'let' for block scoping. let is currently used in browsers, so no need to transpile.
+use 'var' for function scoping
+
+for (let i = 0) instead of for (var i = 0)
+
+const is a variable that cannot be reassigned (not someting that cannot change; not about being mutable or not)
+
+hoisting says functions get hoisted first, then expressions. function expressions dont hoist!
+declarations hoist, expressions dont
+
+let keyword hoists but does not initialize until it reaches it's declaration
+var hoists and initializes to undefined
+
+**** closure: is when a functions remembers it's lexical scope even when the function is executed outside the lexical scope
+2 characteritics - 1) there must be a function. 2) the inner function has to be transported somewhere to be observed by that other function
+setTimeout best example in the slide, the function closes over the variable bar
+click handler another example
+
+closure culling ( removes references to the variables that isn't needed (dont think js uses this))
+be careful of closures, as it will close over all the varibles in the above enclosures. if there's a large array variable u dont want closed over, move it to another function.
+
+in case of the for loop over a closure, use let as it creates multiple versions of i; whereas var creates only 1 verison of i
+
+closure enables module pattern
+
+garbage collector knows not to get rid of scope since there's a closure over it
+
+http version 2 (?) - uses persistant socket connection. therefore better to use smaller separete moduel files
+
+make modules that only expose 1 method in them
+at least a year till node lands es6 modules
+
+quiz 4
+1 enlcosing scope, run at least once
+has to rturn at least 1 funciton
+benefits of module pattern - encapsulation, reusability
+	drawbacks - testing since white box testing needs evrything to be testing to be public, but module pattern needs it to be private. but u can get around it by using dependency injenction
+	black box testing - only test what's publicly available vs whitebox is test everyrhing
+
+NotesManager should be a singleton so create an IFFE
+
+if you're using module factories, dont use new keyword
+
+this---
+here are 4 different ways to call a function
+u need to ask how it was called
+not where it's called from, but how it's called
+
+$("#btn").click(obj.foo.bind(obj));
+
+it's basically doing this...
+
+
+function bind(fn,obj){
+	fn.call(obj);
+}
+
+use module pattern (lexical) if u need predicability
+use this if u need flexibility
+
+dont mix module pattern and this
+
+4 things that new keyword does:
+1. creates a brand new empty obj out of thin air
+2. that brand new empty obj is linked to another object*
+3. passes newly created linked obj as this keyword to the function
+4 if func does not return an obj then it assumes u want obj back (new)
+
+new keyword is doing all the work
+
+this determination:
+1. if so use newly creatd obj
+2. if so use that obj (bind is included in this as well)
+3. if so use that obj (implicit binding)
+4. fall back to default (non-strict mode is global obj else undefined)
+
+quiz
+2. obj.func()
+3. call and apply
+4. bind
+5. new
+
+obj instantiation is a copy process
+inheritance is considered as a genetic process parent-child relationship; a bond exists while creation, but doenst exist after that (child breaks a leg doesnt mean it breaks parent's leg)
+retroactive inheritance??
+
+prototype chain is like scope chain. it keeps going up chain until it finds a match
+
+dunder proto - public prop that exposes internal linkage (from a1 to identify object)
+
+quiz
+1. new keyword in front of fun
+2. linkage between obejcts. comes from obj creation time
+3. we call it inheritance, but more like delegated
+4. duner, .constructor.prototype, object.getProottype
+
+this keyword is dynamic but super keyword is dynamic
+
+delegation is bigger superset
+
+composition thru inheritance
+favor composition over inheritance
+delegation gets rid of parent-child relationship and does peer-peer 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
