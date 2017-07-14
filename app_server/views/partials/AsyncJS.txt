@@ -1,6 +1,6 @@
 Async JS
 
-CSP will be all the range in 18 months. we need to begin to understand this.
+CSP will be all the rage in 18 months. we need to begin to understand this.
 
 metaphor - roller coaster ride - takes multiple people at one time. (parallelism, modeled using threads) vs going on the ride one at a time.
 in threaded system, we CO-ORDINATE.

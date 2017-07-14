@@ -13,7 +13,6 @@ import React    from 'react';
 import ReactDOM from 'react-dom';
 import {Router, Route, browserHistory, IndexRoute} from 'react-router';
 
-import {NavBar} from './components/NavBar.jsx';
 import Alerts from './components/Alerts.jsx';
 import Track  from './components/Track.jsx';
 import {Root}   from './components/Root.jsx';

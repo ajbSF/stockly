@@ -2,7 +2,7 @@
 var mysql      = require('../../node_modules/node-mysql/node_modules/mysql');
 var request    = require('../../node_modules/request');
 
-//import sql_settings from "./sqlSettings";
+//import sql_settings from "./sqlSettings"; 
 var sql_settings = require('./sqlSettings');
 
 console.log('****',sql_settings);
@@ -25,16 +25,16 @@ var closeConnection = function(connection){
     connection.end();
 };
 
-var runQueryNoReturn = function(connection,queryString,callback,tickerArr){
+var runQueryNoReturn = function(connection,queryString,callback,tickerArr){ 
     connection.query(queryString, function(err,rows){
-        callback(err,rows,connection,tickerArr)}); 
+        callback(err,rows,connection,tickerArr)});  
 };
 
 var runQueryReturnData = function(connection,queryString,callback,res){
     console.log('runQueryReturnData query: ',queryString);
 
     connection.query(queryString, function(err,rows){
-        callback(err,rows,connection,res)});   
+        callback(err,rows,connection,res)});    
 };
 
 var callbackTrackTicker = function(err,rows,connection,tickerArr){
@@ -42,9 +42,9 @@ var callbackTrackTicker = function(err,rows,connection,tickerArr){
     closeConnection(connection);
 
     //console.log(connection.escape(queryString));
-    if (err)
+    if (err) 
         console.log('***** Error, could not find record');
- 
+  
     if(rows && rows[0] && rows[0].company_name)
         console.log('callbackTrackTicker: ', rows[0].company_name);
     else{
@@ -85,7 +85,7 @@ module.exports.trackTicker = function(ticker){
 var saveTicker = function(ticker,company_name){
     var connection = createConnection();
 
-    var queryString = "insert ignore into general_info (ticker,company_name,track) values (" + connection.escape(ticker)
+    var queryString = "insert ignore into general_info (ticker,company_name,track) values (" + connection.escape(ticker) 
         + "," + connection.escape(company_name) + "," + "'Y')";
 
     console.log("saveTicker",queryString);
@@ -94,19 +94,19 @@ var saveTicker = function(ticker,company_name){
 };
 
 var callbackSaveTicker = function(err,rows,connection){
-    if (err)
+    if (err) 
         console.log('##### Error, could not save record - ' + err);
     else
-        console.log('Ticker saved'); 
+        console.log('Ticker saved');  
     closeConnection(connection);
 };
 
 var callbackCalculateAlerts_GetTickers = function(err,rows,connection){
     console.log('&&& In callbackCalculateAlerts_GetTickers');
 
-    if (err)
+    if (err) 
         console.log('##### Error, could not find record');
-     
+      
     if(rows && rows[0] && rows[0].ticker){
         console.log('callbackCalculateAlerts_GetTickers: ', rows[0].ticker, rows[0].date);
 
@@ -139,9 +139,16 @@ var formattedDate = function(addDays){
 
 };
 
-var retrieveHistoricalData = function(tickerArr){
-    console.log('$$$callbackCalculateAlerts_DeleteHistoricalData - ',tickerArr[0].ticker);
-       
+var callbackCalculateAlerts_DeleteHistoricalData = function(err,rows,connection,tickerArr){
+
+    closeConnection(connection);
+
+    //'http://ichart.finance.yahoo.com/table.csv?s=AAPL&a=01&b=19&c=2016&d=02&e=19&f=2016&g=d&ignore=.csv'
+    if (err)
+        console.log('callbackCalculateAlerts_DeleteHistoricalData - ##### Error deleting historical data');
+    else{
+        console.log('$$$callbackCalculateAlerts_DeleteHistoricalData - ',tickerArr[0].ticker);
+        
         // Get historical data
         var link;
         var request = require('request');
@@ -151,7 +158,6 @@ var retrieveHistoricalData = function(tickerArr){
         var startDate; // = new Date();
         var completeStartDate, completeEndDate;
         var month;
-        var totalTickers = tickerArr.length;
 
         endDate.setMonth(endDate.getMonth());
         endDate.setYear(endDate.getFullYear());
@@ -162,25 +168,10 @@ var retrieveHistoricalData = function(tickerArr){
 
         //completeStartDate   = startDate.getFullYear() + '-' + startDate.getMonth() + '-' + startDate.getDate();
         completeEndDate     = endDate.getFullYear() + '-' + ("0" + month).slice(-2) + '-' + ("0" + endDate.getDate()).slice(-2);
-        console.log('completeEndDate tickerArr.length',completeEndDate,tickerArr.length);
-
-        var connectionHistData = createConnection();
-        var queryString = 'insert into stockly.historical_data (ticker,date,open,high,low,close,volume) values ';
-
-        setTimeout( function(){
-                        console.log("$$Hello",counter);
-
-                        if(counter === totalTickers){
-                            queryString = queryString.slice(0, -1);
-                            console.log("Save historical data:",queryString);
-                            runQueryNoReturn(connectionHistData,queryString,callbackSaveHistoricalData);
-                        }
-                        else retrieveHistoricalData(tickerArr);
-
-                    }, 10000);
+        console.log('completeEndDate',completeEndDate);
 
         for(var i=0;i<tickerArr.length;i++){
-           
+            
             if(tickerArr[i].date){
                 startDate = new Date(tickerArr[i].date);
                 startDate.setMonth(tickerArr[i].date.getMonth());
@@ -207,62 +198,16 @@ var retrieveHistoricalData = function(tickerArr){
 
             console.log('completeStartDate',completeStartDate);
 
-            /*link = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.historicaldata%20where%20symbol%20%3D%20%22"
-                    + tickerArr[i].ticker + "%22%20and%20startDate%20%3D%20%22" + completeStartDate + "%22%20and%20endDate%20%3D%20%22" +
-                    completeEndDate + "%22&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback="*/
-
-            link = "http://api.tiingo.com/tiingo/daily/" + tickerArr[i].ticker + "/prices?startDate=" + completeStartDate
-                + "&endDate=" + completeEndDate;
+            link = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.historicaldata%20where%20symbol%20%3D%20%22"
+                    + tickerArr[i].ticker + "%22%20and%20startDate%20%3D%20%22" + completeStartDate + "%22%20and%20endDate%20%3D%20%22" + 
+                    completeEndDate + "%22&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback="
+        
             console.log("link",link);
-
-            var auth = 'Token 467282fc9c7c1ba4a2e1685eb8d3c74507f718ea';
-            var requestOptions = {
-            'url': link,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Authorization': auth
-                }
-            };
-
-            request(requestOptions,
-                function(error, response, body) {
-                    if (!error && response.statusCode == 200) {
-                        var histData = JSON.parse(body);
-                        //console.log('***',JSON.parse(body),this.ticker);
-                        counter++;
-                        console.log(counter,this.ticker,totalTickers);
-
-                        if(histData.length === 1){
-                            queryString += "('" +
-                                this.ticker + "'," + connectionHistData.escape(histData[0].date.slice(0,10)) + ',' + 
-                                connectionHistData.escape(histData[0].open) + "," + connectionHistData.escape(histData[0].high) + "," +
-                                connectionHistData.escape(histData[0].low) + "," + connectionHistData.escape(histData[0].close) + "," +
-                                connectionHistData.escape(histData[0].volume) + "),";
-                        }
-                        else{
-                            for(var j=0;j<histData.length;j++){
-                                queryString += "('" +
-                                    this.ticker + "'," + connectionHistData.escape(histData[j].date.slice(0,10)) + ',' + 
-                                    connectionHistData.escape(histData[j].open) + "," + connectionHistData.escape(histData[j].high) + "," +
-                                    connectionHistData.escape(histData[j].low) + "," + connectionHistData.escape(histData[j].close) + "," +
-                                    connectionHistData.escape(histData[j].volume) + "),";
-                            }
-                        }
-
-                        /*if(counter === totalTickers){
-                            queryString = queryString.slice(0, -1);
-                            console.log("Save historical data:",queryString);
-                            runQueryNoReturn(connectionHistData,queryString,callbackSaveHistoricalData);
-                        }*/
-                    }
-                }.bind({ticker: tickerArr[i].ticker})
-            );
-
-            /*request(link, function (error, response, body) {
+            request(link, function (error, response, body) {
                 if (!error && response.statusCode == 200) {
                     var info = JSON.parse(body);
                     console.log('^^^^ info,info.query.count,counter,tickerArr.length',info,info.query.count,counter,tickerArr.length);
-                   
+                    
                     //console.log(counter,info.query.results.quote[0].Symbol + " " + info.query.results.quote[0].Close);
                     histData[counter] = info.query;  //results.quote
                     counter++;
@@ -282,24 +227,24 @@ var retrieveHistoricalData = function(tickerArr){
                                 if(histData[i].count === 1){
                                     //console.log('$$$$$$$$$$$$$$ histData[i].Symbol',histData[i].results.quote.Symbol);
 
-                                    queryString += "(" +
-                                    connectionHistData.escape(histData[i].results.quote.Symbol) + ',' + connectionHistData.escape(histData[i].results.quote.Date) + ',' + 
-                                    connectionHistData.escape(histData[i].results.quote.Open) + "," + connectionHistData.escape(histData[i].results.quote.High) + "," +
-                                    connectionHistData.escape(histData[i].results.quote.Low) + "," + connectionHistData.escape(histData[i].results.quote.Close) + "," +
+                                    queryString += "(" + 
+                                    connectionHistData.escape(histData[i].results.quote.Symbol) + ',' + connectionHistData.escape(histData[i].results.quote.Date) + ',' +  
+                                    connectionHistData.escape(histData[i].results.quote.Open) + "," + connectionHistData.escape(histData[i].results.quote.High) + "," + 
+                                    connectionHistData.escape(histData[i].results.quote.Low) + "," + connectionHistData.escape(histData[i].results.quote.Close) + "," + 
                                     connectionHistData.escape(histData[i].results.quote.Volume) + "),";
                                 }
                                 else {
                                     //console.log('**************** histData[i][j].Symbol',histData[i].results.quote[j].Symbol);
 
-                                    queryString += "(" +
-                                    connectionHistData.escape(histData[i].results.quote[j].Symbol) + ',' + connectionHistData.escape(histData[i].results.quote[j].Date) + ',' + 
-                                    connectionHistData.escape(histData[i].results.quote[j].Open) + "," + connectionHistData.escape(histData[i].results.quote[j].High) + "," +
-                                    connectionHistData.escape(histData[i].results.quote[j].Low) + "," + connectionHistData.escape(histData[i].results.quote[j].Close) + "," +
+                                    queryString += "(" + 
+                                    connectionHistData.escape(histData[i].results.quote[j].Symbol) + ',' + connectionHistData.escape(histData[i].results.quote[j].Date) + ',' +  
+                                    connectionHistData.escape(histData[i].results.quote[j].Open) + "," + connectionHistData.escape(histData[i].results.quote[j].High) + "," + 
+                                    connectionHistData.escape(histData[i].results.quote[j].Low) + "," + connectionHistData.escape(histData[i].results.quote[j].Close) + "," + 
                                     connectionHistData.escape(histData[i].results.quote[j].Volume) + "),";
                                 }
                             }
                         }
-                        queryString = queryString.slice(0, -1);   
+                        queryString = queryString.slice(0, -1);    
                         //queryString = "insert into stockly.historical_data (stock_id,date,open,high,low,close,volume) values (9,'2016-10-27','126.84','126.90','124.42','124.87','6502400'),(9,'2016-10-28','126.02','128.93','126.02','126.57','7050500');";
                         //insert into stockly.historical_data (stock_id,date,open,high,low,close,volume) values (9,'2016-10-28','126.02','128.93','126.02','126.57','7050500');
                         console.log("Save historical data:",queryString);
@@ -307,32 +252,19 @@ var retrieveHistoricalData = function(tickerArr){
                         runQueryNoReturn(connectionHistData,queryString,callbackSaveHistoricalData);
                     }
                 }
-            });*/
+            });
         }
-        queryString = queryString.slice(0, -1);
-        console.log("Save historical data:",queryString);
-////                        runQueryNoReturn(connectionHistData,queryString,callbackSaveHistoricalData);
-   
-};
-
-var callbackCalculateAlerts_DeleteHistoricalData = function(err,rows,connection,tickerArr){
-
-    closeConnection(connection);
-
-    //'http://ichart.finance.yahoo.com/table.csv?s=AAPL&a=01&b=19&c=2016&d=02&e=19&f=2016&g=d&ignore=.csv'
-    if (err)
-        console.log('callbackCalculateAlerts_DeleteHistoricalData - ##### Error deleting historical data');
-    else{ retrieveHistoricalData(tickerArr)};
+    }
 };
 
 var callbackSaveHistoricalData = function(err,rows,connection){
-   
+    
     closeConnection(connection);
 
-    if (err)
+    if (err) 
         console.log('##### Error, could not save historical_data - ' + err);
     else{
-        console.log('callbackSaveHistoricalData - Historical data saved'); 
+        console.log('callbackSaveHistoricalData - Historical data saved');  
 
         // Delete historical data
         var connectionSP = createConnection();
@@ -346,13 +278,13 @@ var callbackSaveHistoricalData = function(err,rows,connection){
 };
 
 var callbackCalculateAlerts_RunAlertsSP = function(err,rows,connection){
-   
+    
     closeConnection(connection);
 
-    if (err)
+    if (err) 
         console.log('##### Error, could not run alerts SP - ' + err);
     else{
-        console.log('callbackCalculateAlerts_RunAlertsSP - Run Alerts SP success'); 
+        console.log('callbackCalculateAlerts_RunAlertsSP - Run Alerts SP success');  
     }
 };
 
@@ -382,13 +314,13 @@ var callbackAlertDataGet_GetData = function(err,rows,connection,res){
         res.end('GetData Error');
     }
     else{
-        console.log('callbackAlertDataGet_GetData - success'); 
+        console.log('callbackAlertDataGet_GetData - success');  
         if(rows){
             //console.log(rows);
             //res.update('index', { title: 'Borcar' });
             //res.render('index', { title: 'Borcar' });
             //new EJS({url:'/views/index.ejs'}).update('title','Borcar');
-           
+            
             res.json(rows);
             //res.render('partials/todays_alerts', { ticker: "ADSK"});
         }
@@ -397,7 +329,7 @@ var callbackAlertDataGet_GetData = function(err,rows,connection,res){
 
 module.exports.alertPivotDataGet = function(res){
     var connection = createConnection();
-    var queryString = "call stockly.sp_get_alerts_pivot('2017-05-01');" //" + formattedDate() + "');"; //2017-01-20');"; /(select max(date) from alerts);
+    var queryString = "call stockly.sp_get_alerts_pivot('2017-01-01');" //" + formattedDate() + "');"; //2017-01-20');"; /(select max(date) from alerts);
     console.log('&&&',queryString);
     var trackTickers = runQueryReturnData(connection,queryString,callbackAlertPivotDataGet_GetData,res);
     //console.log('***',trackTickers);
@@ -411,17 +343,16 @@ var callbackAlertPivotDataGet_GetData = function(err,rows,connection,res){
         res.end('GetData Error');
     }
     else{
-        console.log('callbackAlertPivotDataGet_GetData - success'); 
+        console.log('callbackAlertPivotDataGet_GetData - success');  
         if(rows){
             //console.log(rows);
             //res.update('index', { title: 'Borcar' });
             //res.render('index', { title: 'Borcar' });
             //new EJS({url:'/views/index.ejs'}).update('title','Borcar');
-           
+            
             res.json(rows);
             //res.render('partials/todays_alerts', { ticker: "ADSK"});
         }
     }
 };
-
 

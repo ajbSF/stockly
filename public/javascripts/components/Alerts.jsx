@@ -15,7 +15,7 @@ export default class Alerts extends React.Component {
 		};
 
 		this.originalData = ['date':'', 'ticker':'','slow_stoch':'','fast_stoch': '', 'in_portfolio': '', 'close':'', 'high':'', 'low':'', 'buy_sell':''];
-		this.latestDate = '01-01-1900';
+		this.latestDate = '1900-01-01';
 
 		this.realizedGainLoss=0;
 		this.unrealizedGainLoss=0;
@@ -165,7 +165,7 @@ export default class Alerts extends React.Component {
 	}
 
 	handleTodaysAlertsCB(filteredArray,todaysAlerts){
-
+console.log(this.latestDate);
 		let filteredArrayTodaysAlerts = [];
 
 		if (todaysAlerts){
@@ -368,7 +368,7 @@ export default class Alerts extends React.Component {
 	render(){
 		console.log('%%%###',result);
 
-		this.calculateGainLoss();
+//		this.calculateGainLoss();
 
 		let long_term_stocks = [], short_term_stocks = [];
 		for (let i = 0; i < this.state.myresult.length; i++) {
@@ -376,7 +376,8 @@ export default class Alerts extends React.Component {
 		  if(this.state.myresult[i].date && this.state.myresult[i].short_term === 'Y'){
 
 		  	  if(this.latestDate < this.state.myresult[i].date)
-		  	  	this.latestDate = this.formatDate(new Date(this.state.myresult[i].date));
+		  	  	this.latestDate = this.state.myresult[i].date;
+		  	  	//this.latestDate = this.formatDate(new Date(this.state.myresult[i].date));
 
 			  short_term_stocks.push
 				(<tr key={i} className={'InPortfolio_' + this.state.myresult[i].in_portfolio}>
@@ -434,6 +435,7 @@ export default class Alerts extends React.Component {
 			  				<span className='indent makebold' key={i+i+this.state.myresult[i].ticker}>{this.state.myresult[i].ticker}</span>
 			  			</a>
 			  		</td>
+			  		{/* */}
 			  		<td  key={i+i+this.state.myresult[i].slow_stoch+this.state.myresult[i].date+this.state.myresult[i].ticker+'J'} 
 			  			className={'BS_'+this.calculateOversoldOverbought(this.state.myresult[i].slow_stoch)+' '
 	 					+ this.calculateStochMomentum(this.state.myresult[i].slow_stoch,this.state.myresult[i].fast_stoch)}>
@@ -454,7 +456,7 @@ export default class Alerts extends React.Component {
 			  		<td  key={i+i+this.state.myresult[i].high+this.state.myresult[i].date+this.state.myresult[i].ticker+'N'}
 			  			className='indent'>
 			  			{this.state.myresult[i].high}
-			  		</td>		
+			  		</td>	
 			  		<td  key={i+i+this.state.myresult[i].close+this.state.myresult[i].high+this.state.myresult[i].date+this.state.myresult[i].ticker} 
 			  			className={this.state.myresult[i].buy_sell + '_Stoch' + ' makebold'}>
 			  				{this.state.myresult[i].price}
@@ -468,7 +470,7 @@ export default class Alerts extends React.Component {
 		  }
 
 		}		
-
+//console.log('@@@@@@@',long_term_stocks[0]);
 		return (
 	      
 	      	<div className='container'>
@@ -557,7 +559,7 @@ export default class Alerts extends React.Component {
 						        <th>Fast Stoch</th>
 						        <th>Close</th>
 						        <th>Low</th>
-						        <th>High</th>
+						        <th>High</th> 
 						        <th>Price</th>
 						        <th>Stop Loss</th>
 						      </tr>

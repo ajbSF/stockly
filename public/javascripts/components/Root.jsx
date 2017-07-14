@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import NavBar from "./NavBar.jsx";
+import {NavBar} from "./NavBar.jsx";
 
 export class Root extends React.Component {
     render() {
